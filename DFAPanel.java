@@ -82,46 +82,51 @@ public class DFAPanel extends JPanel {
         checkBtn.addActionListener(e -> checkDFA());
         inputField.addActionListener(e -> checkDFA());
     }
-private void checkDFA() {
-    String input = inputField.getText().trim();
-    if (!input.matches("[01]*")) {
-        resultLabel.setText("Invalid — only 0s and 1s allowed");
-        resultLabel.setForeground(new Color(220, 150, 0));
-        return;
-    }
-    if (input.isEmpty()) {
-        resultLabel.setText("REJECTED — empty string");
-        resultLabel.setForeground(Main.ERROR);
-        explanationArea.setText("Empty string rejected: doesn't end with 0.");
-        return;
-    }
 
-    int onesMod3 = 0;
-    char lastChar = ' ';
-    StringBuilder trace = new StringBuilder();
-    trace.append(String.format("  %-8s %-18s %-10s%n", "Char", "State (1s mod 3)", "Last"));
-    trace.append("  " + "─".repeat(38) + "\n");
+    private void checkDFA() {
+        String input = inputField.getText().trim();
+        if (!input.matches("[01]*")) {
+            resultLabel.setText("Invalid — only 0s and 1s allowed");
+            resultLabel.setForeground(new Color(220, 150, 0));
+            return;
+        }
+        if (input.isEmpty()) {
+            resultLabel.setText("REJECTED — empty string");
+            resultLabel.setForeground(Main.ERROR);
+            explanationArea.setText(
+                "  Empty string: 0 ones (divisible by 3 \u2713) but no last character (must end with 0 \u2717).\n  Rejected.");
+            return;
+        }
 
-    for (char c : input.toCharArray()) {
-        if (c == '1') onesMod3 = (onesMod3 + 1) % 3;
-        lastChar = c;
-        trace.append(String.format("  %-8s %-18s %-10s%n", c, "q" + onesMod3, lastChar));
+        int onesMod3 = 0;
+        char lastChar = ' ';
+        StringBuilder trace = new StringBuilder();
+        // Full DFA state encodes both (1s mod 3) and (last char), e.g. q0_0 is the sole accept state
+        trace.append(String.format("  %-6s  %-24s%n", "Char", "DFA State (mod3_last)"));
+        trace.append("  " + "\u2500".repeat(34) + "\n");
+
+        for (char c : input.toCharArray()) {
+            if (c == '1') onesMod3 = (onesMod3 + 1) % 3;
+            lastChar = c;
+            trace.append(String.format("  %-6s  %-24s%n", c, "q" + onesMod3 + "_" + c));
+        }
+
+        boolean accepted = (onesMod3 == 0) && (lastChar == '0');
+        trace.append("\n  " + "\u2500".repeat(34) + "\n");
+        trace.append("  Final state  : q" + onesMod3 + "_" + lastChar + "\n");
+        trace.append("  Accept state : q0_0\n");
+        trace.append("  1s mod 3 = 0 : " + (onesMod3 == 0 ? "[\u2713]" : "[\u2717]") + "\n");
+        trace.append("  Ends with 0  : " + (lastChar == '0' ? "[\u2713]" : "[\u2717]") + "\n");
+        trace.append("\n  Verdict: " + (accepted ? "ACCEPTED [\u2713]" : "REJECTED [\u2717]"));
+
+        if (accepted) {
+            resultLabel.setText("ACCEPTED");
+            resultLabel.setForeground(Main.SUCCESS);
+        } else {
+            resultLabel.setText("REJECTED");
+            resultLabel.setForeground(Main.ERROR);
+        }
+        explanationArea.setText(trace.toString());
     }
-
-    boolean accepted = (onesMod3 == 0) && (lastChar == '0');
-    trace.append("\n  " + "─".repeat(38) + "\n");
-    trace.append("  Final state  : q" + onesMod3 + "  " + (onesMod3 == 0 ? "[OK]" : "[X]") + "\n");
-    trace.append("  Last char    : " + lastChar + "  " + (lastChar == '0' ? "[OK]" : "[X]") + "\n");
-    trace.append("\n  Verdict: " + (accepted ? "ACCEPTED [OK]" : "REJECTED [X]"));
-
-    if (accepted) {
-        resultLabel.setText("ACCEPTED");
-        resultLabel.setForeground(Main.SUCCESS);
-    } else {
-        resultLabel.setText("REJECTED");
-        resultLabel.setForeground(Main.ERROR);
-    }
-    explanationArea.setText(trace.toString());
-}
 
 }

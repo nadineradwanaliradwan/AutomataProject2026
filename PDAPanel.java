@@ -99,27 +99,30 @@ public class PDAPanel extends JPanel {
         String reason = "";
 
         for (char c : input.toCharArray()) {
-            trace.append(String.format("  %-8s %-10s %-20s%n", c, state, stack.toString()));
+            // Apply transition first, then record post-transition state in trace
             if (state.equals("q0")) {
-                if (c == 'a') stack.push('a');
-                else {
+                if (c == 'a') {
+                    stack.push('a');
+                } else {
                     state = "q1";
                     if (stack.peek() == 'a') stack.pop();
-                    else { rejected = true; reason = "More b's than a's"; break; }
+                    else { rejected = true; reason = "More b's than a's"; }
                 }
             } else {
-                if (c == 'a') { rejected = true; reason = "'a' found after 'b'"; break; }
+                if (c == 'a') { rejected = true; reason = "'a' found after 'b'"; }
                 else if (stack.peek() == 'a') stack.pop();
-                else { rejected = true; reason = "More b's than a's"; break; }
+                else { rejected = true; reason = "More b's than a's"; }
             }
+            trace.append(String.format("  %-8s %-10s %-20s%n", c, state, stack.toString()));
+            if (rejected) break;
         }
 
         trace.append(String.format("  %-8s %-10s %-20s%n", "END", state, stack.toString()));
         boolean accepted = !rejected && stack.size() == 1 && stack.peek() == 'Z';
 
-        trace.append("\n  " + "─".repeat(40) + "\n");
+        trace.append("\n  " + "\u2500".repeat(40) + "\n");
         if (rejected) trace.append("  Reason: " + reason + "\n");
-        else if (!accepted) trace.append("  Reason: Unmatched a's remain\n");
+        else if (!accepted) trace.append("  Reason: " + (stack.size() - 1) + " unmatched a(s) remain\n");
         trace.append("\n  Verdict: " + (accepted ? "ACCEPTED [OK]" : "REJECTED [X]"));
 
         if (accepted) {

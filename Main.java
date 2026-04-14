@@ -76,6 +76,7 @@ public class Main {
         area.setForeground(TEXT);
         area.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
         area.setLineWrap(true);
+        area.setWrapStyleWord(true);
         return area;
     }
 

@@ -60,7 +60,7 @@ public class CFGtoPDAPanel extends JPanel {
     }
 
     private void convert() {
-        String[] lines = grammarInput.getText().trim().split("\n");
+        String[] lines = grammarInput.getText().trim().split("\\r?\\n");
         StringBuilder out = new StringBuilder();
         out.append("  PDA = (Q, Σ, Γ, δ, q0, Z, F)\n");
         out.append("  States  : Q = { q0, qloop, qaccept }\n");
@@ -81,7 +81,7 @@ public class CFGtoPDAPanel extends JPanel {
                 prod = prod.trim();
                 out.append("  δ(qloop, ε, " + lhs + ") → (qloop, " + prod + ")\n");
                 for (char c : prod.toCharArray())
-                    if (Character.isLowerCase(c) && c != 'ε')
+                    if (c >= 'a' && c <= 'z')
                         terminals.add(String.valueOf(c));
             }
         }
